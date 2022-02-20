@@ -21,7 +21,6 @@ class ReportParams:
     end_date: datetime.datetime = None
     priority: int = None
     complete: bool = False
-    category_name: str = ""
 
 
 def task_report(params):
@@ -33,7 +32,7 @@ def task_report(params):
         completed_subtasks_count=subtask_completed,
     )
     categories_index = {}
-    for category in Category.objects.custom_filter(owner=params.user, name=params.category_name):
+    for category in Category.objects.custom_filter(owner=params.user):
         categories_index[category.pk] = category
 
     for entry in queryset:

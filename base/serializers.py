@@ -99,7 +99,6 @@ class ParamsTaskSerializer(serializers.Serializer):
     end_date = serializers.DateTimeField(required=False)
     priority = serializers.IntegerField(required=False)
     complete = serializers.BooleanField(required=False)
-    category_name = serializers.CharField(max_length=32, required=False)
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     def create(self, validated_data):
