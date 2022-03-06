@@ -1,8 +1,9 @@
 from rest_framework import serializers
-
-from base.models import Task, Subtask, Category, Tag, Attachment
+from base.models import Task, Subtask, Category, Attachment
 from django.contrib.auth.models import User
-
+from taggit.serializers import (TagListSerializerField,
+                                TaggitSerializer)
+from taggit.models import Tag, TaggedItem
 from base.reports import ReportParams
 
 
@@ -10,12 +11,6 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ("owner", "name")
-
-
-class TagSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tag
-        fields = ("label",)
 
 
 class AttachmentSerializer(serializers.ModelSerializer):
@@ -41,12 +36,12 @@ class ReadOnlyUserSerializer:
         fields = ("id", "username")
 
 
-class ReadTaskSerializer(serializers.ModelSerializer):
+class ReadTaskSerializer(TaggitSerializer, serializers.ModelSerializer):
     category = serializers.StringRelatedField()
     subtasks = SubtaskSerializer(many=True)
     attachments = AttachmentSerializer(many=True)
     owner = ReadOnlyUserSerializer()
-    tags = serializers.SlugRelatedField(many=True, read_only=True, slug_field="label")
+    tags = TagListSerializerField()
 
     class Meta:
         model = Task
@@ -89,12 +84,13 @@ class WriteTaskSerializer(serializers.ModelSerializer):
         self.fields["category"].queryset = owner.categories.all()
 
 
-class ReportTaskSerializer(serializers.Serializer):
+class ReportTaskSerializer(TaggitSerializer, serializers.Serializer):
     category = CategorySerializer()
+    tag = serializers.CharField(max_length=32)
     completed_subtasks_count = serializers.DecimalField(max_digits=15, decimal_places=2)
 
 
-class ParamsTaskSerializer(serializers.Serializer):
+class ParamsTaskSerializer(TaggitSerializer, serializers.Serializer):
     start_date = serializers.DateTimeField(required=False)
     end_date = serializers.DateTimeField(required=False)
     priority = serializers.IntegerField(required=False)

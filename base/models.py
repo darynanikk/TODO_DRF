@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from taggit.managers import TaggableManager
 
 from base.customs import ReportTaskManager
 
@@ -9,15 +10,11 @@ class Category(models.Model):
     name = models.CharField(max_length=32, blank=True)
     objects = ReportTaskManager()
 
+    class Meta:
+        ordering = ['id']
+
     def __str__(self):
         return self.name
-
-
-class Tag(models.Model):
-    label = models.CharField(max_length=50)
-
-    def __str__(self):
-        return self.label
 
 
 class Task(models.Model):
@@ -36,7 +33,7 @@ class Task(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     priority = models.IntegerField(choices=Priority.choices)
     category = models.ForeignKey(Category, null=True, blank=True, related_name='tasks', on_delete=models.SET_NULL)
-    tags = models.ManyToManyField(Tag, related_name="tasks")
+    tags = TaggableManager()
 
     def __str__(self):
         return self.title
